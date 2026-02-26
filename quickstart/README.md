@@ -1,0 +1,170 @@
+# PySpark 4.x Local Quickstart (Docker Compose)
+
+Get a fully functional Apache Spark **4.1.1** cluster running locally in minutes using the official [apache/spark](https://hub.docker.com/r/apache/spark) Docker image.
+
+## Cluster topology
+
+| Service | Container | Port |
+|---|---|---|
+| Spark Master | `spark-master` | `7077` (cluster), `8080` (Web UI) |
+| Spark Worker 1 | `spark-worker-1` | `8081` (Web UI) |
+| Spark Worker 2 | `spark-worker-2` | `8082` (Web UI) |
+| History Server | `spark-history` | `18080` (Web UI) |
+
+---
+
+## Prerequisites
+
+| Requirement | Minimum version | Check |
+|---|---|---|
+| **Docker Engine** | 24.x | `docker --version` |
+| **Docker Compose** | v2.20 (plugin) | `docker compose version` |
+| RAM | 6 GB available to Docker | Docker Desktop → Settings → Resources |
+| Disk | 3 GB free (image download) | — |
+
+> **Linux users** - Docker Engine and the Compose plugin are separate packages.  
+> Install: `sudo apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin`
+
+---
+
+## Quickstart
+
+### 1. Clone / navigate to this directory
+
+```bash
+cd quickstart/
+```
+
+### 2. Pull images (optional — speeds up first start)
+
+```bash
+docker pull apache/spark:4.1.1-scala2.13-java21-python3-ubuntu
+```
+
+### 3. Start the cluster
+
+```bash
+docker compose up -d
+```
+
+Wait ~15 seconds for all services to be ready, then check status:
+
+```bash
+docker compose ps
+```
+
+Expected output — all services should be `running (healthy)` or `running`:
+
+```
+NAME              STATUS
+spark-master      running (healthy)
+spark-worker-1    running
+spark-worker-2    running
+spark-history     running
+```
+
+### 4. Open the Web UIs
+
+| UI | URL |
+|---|---|
+| Spark Master | http://localhost:8080 |
+| Worker 1 | http://localhost:8081 |
+| Worker 2 | http://localhost:8082 |
+| History Server | http://localhost:18080 |
+
+### 5. Submit the sample PySpark job
+
+```bash
+docker exec spark-master /opt/spark/bin/spark-submit \
+  --master spark://spark-master:7077 \
+  --deploy-mode client \
+  /opt/spark/jobs/hello_spark.py
+```
+
+You should see word counts, a DataFrame, and SQL results printed to the terminal.
+
+### 6. Interactive PySpark shell
+
+```bash
+docker exec -it spark-master /opt/spark/bin/pyspark \
+  --master spark://spark-master:7077
+```
+
+### 7. Stop the cluster
+
+```bash
+# Stop and remove containers (keeps the spark-logs volume)
+docker compose down
+
+# Stop AND remove containers + volumes
+docker compose down -v
+```
+
+---
+
+## Project structure
+
+```
+quickstart/
+├── docker-compose.yml   # Cluster definition (master, 2 workers, history server)
+├── README.md            # This file
+└── jobs/
+    └── hello_spark.py   # Sample PySpark job
+```
+
+Place your own `.py` job scripts under `jobs/` — the directory is mounted into every
+container at `/opt/spark/jobs/`.
+
+---
+
+## Configuration
+
+Key environment variables you can adjust in `docker-compose.yml`:
+
+| Variable | Default | Description |
+|---|---|---|
+| `SPARK_WORKER_CORES` | `2` | CPU cores per worker |
+| `SPARK_WORKER_MEMORY` | `2g` | Memory per worker |
+| `SPARK_MASTER_PORT` | `7077` | Master RPC port |
+| `SPARK_MASTER_WEBUI_PORT` | `8080` | Master Web UI port |
+
+To scale workers dynamically:
+
+```bash
+docker compose up -d --scale spark-worker-1=3
+```
+
+> Note: when scaling, remove the explicit `container_name` from the worker services in
+> `docker-compose.yml` first, as fixed names conflict with multiple replicas.
+
+---
+
+## Troubleshooting
+
+**Workers not connecting to master**  
+Verify the master is healthy: `docker compose ps spark-master`  
+Check logs: `docker compose logs spark-master`
+
+**Port already in use**  
+Change the host-side port mapping in `docker-compose.yml`, e.g. `"9080:8080"`.
+
+**Out of memory errors**  
+Increase Docker's memory limit in Docker Desktop settings, or reduce
+`SPARK_WORKER_MEMORY` in `docker-compose.yml`.
+
+**Inspect container logs**
+
+```bash
+docker compose logs -f spark-master
+docker compose logs -f spark-worker-1
+```
+
+---
+
+## Image reference
+
+- **Image**: `apache/spark:4.1.1-scala2.13-java21-python3-ubuntu`
+- **Registry**: [hub.docker.com/r/apache/spark](https://hub.docker.com/r/apache/spark)
+- **Spark version**: 4.1.1 (released Jan 09, 2026)
+- **Java**: 21 | **Scala**: 2.13 | **Python**: 3.x
+- **Supported platforms**: `linux/amd64`, `linux/arm64` (Apple Silicon)
