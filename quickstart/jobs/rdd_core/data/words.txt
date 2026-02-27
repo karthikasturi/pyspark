@@ -1,0 +1,15 @@
+apache spark is a fast and general purpose cluster computing system
+spark provides apis in scala java python and r
+it also supports higher level tools like spark sql for sql and structured data
+mllib for machine learning graphx for graph processing
+spark streaming for stream processing and dataframes
+the spark core engine provides distributed task scheduling
+fault tolerance and memory management
+rdds are the fundamental data abstraction in spark
+an rdd is a resilient distributed dataset
+rdds are immutable distributed collections of objects
+spark is designed for large scale data processing
+data locality is a key principle in spark scheduling
+spark tries to run tasks on nodes where data resides
+broadcast variables reduce data shuffling in spark
+accumulators are used for aggregating values across tasks

@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# PySpark / Hadoop
+derby.log
+metastore_db/
+spark-warehouse/
+*.crc
+
+# Logs
+logs/
+*.log
+log/
+
+# Docker
+.docker/
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+*~
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
